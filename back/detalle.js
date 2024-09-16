@@ -2,15 +2,21 @@ const { Pool } = require('pg');
 const pool = new Pool({
  host: 'localhost',
  user: 'postgres',
- password: '1234',
+ password: '261295.',
  database: 'likeme',
  allowExitOnIdle: true,
- port: 5433,
+ port: 5432,
+ schema: 'public',
 });
 
 const obtenerPost = async () => {
-const {rows} = await pool.query("SELECT * FROM posts;");
- return rows; 
+  try {
+    const { rows } = await pool.query("SELECT * FROM posts;");
+    return rows;
+  } catch (error) {
+    console.error("Error al obtener los posts:", error);
+        throw error; 
+  }
 };
 
 const escribirPost = async (titulo, url, descripcion) => {
@@ -21,5 +27,18 @@ const escribirPost = async (titulo, url, descripcion) => {
     console.log("Post Agregado", result);
   };
 
-obtenerPost()
-module.exports = {obtenerPost, escribirPost};
+ obtenerPost()
+
+ const addLike = async (id) => {
+ const like = "UPDATE posts SET likes = (likes + 1) WHERE id = $1";
+ const values = [id];
+ await pool.query(like, values);
+ }
+
+  const borrarPost = async (id) => {
+  const consulta ="DELETE FROM posts WHERE id =$1";
+  const values = [id];
+ await pool.query(consulta, values);
+ } 
+
+module.exports = {obtenerPost, escribirPost, addLike, borrarPost};
